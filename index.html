@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0066CC">
+    <meta name="description" content="British Gas Grant Finder - Find support schemes quickly">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>BG Grant Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0066CC;
+            --bg-secondary: #004C99;
+            --bg-success: #00A651;
+            --bg-warning: #FF6B00;
+            --text-primary: #1A1A1A;
+            --text-secondary: #666;
+            --text-white: #FFFFFF;
+            --border-color: #E0E0E0;
+            --background: #F5F5F5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--bg-primary);
+            color: var(--text-white);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .question {
+            display: none;
+        }
+
+        .question.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .question h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .question-number {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            text-align: left;
+            color: var(--text-primary);
+        }
+
+        .option-btn:hover {
+            border-color: var(--bg-primary);
+            background: #F0F7FF;
+        }
+
+        .option-btn:active {
+            transform: scale(0.98);
+        }
+
+        .option-btn.selected {
+            border-color: var(--bg-primary);
+            background: #E6F2FF;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--bg-primary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .checkbox-label:hover {
+            border-color: var(--bg-primary);
+            background: #F0F7FF;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 0.75rem;
+            margin-top: 0.25rem;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-label.checked {
+            border-color: var(--bg-primary);
+            background: #E6F2FF;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--bg-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--bg-secondary);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--bg-primary);
+            border: 2px solid var(--bg-primary);
+        }
+
+        .btn-secondary:hover {
+            background: #F0F7FF;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .grant-card {
+            background: white;
+            border-left: 4px solid var(--bg-success);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .grant-card.not-eligible {
+            border-left-color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .grant-card h3 {
+            color: var(--bg-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+
+        .grant-card .status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .status.eligible {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status.not-eligible {
+            background: #F5F5F5;
+            color: var(--text-secondary);
+        }
+
+        .grant-card ul {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .grant-card li {
+            margin-bottom: 0.5rem;
+        }
+
+        .grant-link {
+            display: inline-block;
+            background: var(--bg-primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+
+        .grant-link:hover {
+            background: var(--bg-secondary);
+        }
+
+        .progress {
+            height: 4px;
+            background: #E0E0E0;
+            border-radius: 2px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--bg-primary);
+            transition: width 0.3s ease;
+        }
+
+        .restart-btn {
+            margin-top: 2rem;
+            width: 100%;
+        }
+
+        .info-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .install-prompt {
+            background: #FFF3E0;
+            border: 2px solid var(--bg-warning);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .install-prompt.show {
+            display: block;
+        }
+
+        .install-prompt button {
+            background: var(--bg-warning);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏠 BG Grant Finder</h1>
+        <p>Find the right support scheme in minutes</p>
+    </div>
+
+    <div class="container">
+        <div id="installPrompt" class="install-prompt">
+            <strong>Install this app</strong>
+            <p>Add to your home screen for quick access</p>
+            <button onclick="installApp()">Install</button>
+        </div>
+
+        <div id="questionnaire" class="card">
+            <div class="progress">
+                <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+            </div>
+
+            <!-- Question 1: Situation -->
+            <div class="question active" data-question="1">
+                <div class="question-number">Question 1 of 7</div>
+                <h2>What support are you looking for?</h2>
+                <div class="options">
+                    <button class="option-btn" data-value="energy-debt">Help with energy debt</button>
+                    <button class="option-btn" data-value="broken-boiler">Emergency boiler replacement (no heat)</button>
+                    <button class="option-btn" data-value="energy-advice">Energy advice and support</button>
+                    <button class="option-btn" data-value="home-improvements">Home insulation or heating upgrades</button>
+                    <button class="option-btn" data-value="not-sure">Not sure - show me everything</button>
+                </div>
+            </div>
+
+            <!-- Question 2: Home Ownership -->
+            <div class="question" data-question="2">
+                <div class="question-number">Question 2 of 7</div>
+                <h2>Do you own or rent your home?</h2>
+                <div class="options">
+                    <button class="option-btn" data-value="homeowner">I own my home</button>
+                    <button class="option-btn" data-value="private-tenant">I rent privately</button>
+                    <button class="option-btn" data-value="social-tenant">I rent from a housing association/council</button>
+                </div>
+            </div>
+
+            <!-- Question 3: Benefits -->
+            <div class="question" data-question="3">
+                <div class="question-number">Question 3 of 7</div>
+                <h2>Are you claiming any means-tested benefits?</h2>
+                <p class="info-text">Select all that apply</p>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="benefits" value="pension-credit">
+                        <span>Pension Guarantee Credit</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="benefits" value="esa">
+                        <span>Income-related Employment and Support Allowance (ESA)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="benefits" value="jsa">
+                        <span>Income-based Jobseeker's Allowance (JSA)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="benefits" value="income-support">
+                        <span>Income Support</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="benefits" value="tax-credits">
+                        <span>Child Tax Credit / Working Tax Credit</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="benefits" value="universal-credit">
+                        <span>Universal Credit</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="benefits" value="housing-benefit">
+                        <span>Housing Benefit</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="benefits" value="pension-saving">
+                        <span>Pension Credit Saving Credit</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="benefits" value="none">
+                        <span>None of these</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 4: Household Income -->
+            <div class="question" data-question="4">
+                <div class="question-number">Question 4 of 7</div>
+                <h2>What is your total annual household income?</h2>
+                <div class="input-group">
+                    <label for="income">Annual household income (£)</label>
+                    <input type="number" id="income" placeholder="e.g., 25000" min="0">
+                </div>
+            </div>
+
+            <!-- Question 5: Household Composition -->
+            <div class="question" data-question="5">
+                <div class="question-number">Question 5 of 7</div>
+                <h2>Does anyone in your household meet these criteria?</h2>
+                <p class="info-text">Select all that apply</p>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="household" value="over-65">
+                        <span>Someone aged 65 or over</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="household" value="under-5">
+                        <span>Child under 5 years old</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="household" value="3-plus-children">
+                        <span>3 or more children</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="household" value="pip-dla">
+                        <span>Someone claiming PIP, DLA, or Attendance Allowance</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="household" value="carer">
+                        <span>Carer or claiming Carers Allowance</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="household" value="health-condition">
+                        <span>Someone with a serious health condition (cancer, cardiovascular, respiratory, mobility disability, mental health)</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="household" value="none">
+                        <span>None of these</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 6: Energy Debt -->
+            <div class="question" data-question="6">
+                <div class="question-number">Question 6 of 7</div>
+                <h2>Do you have energy debt?</h2>
+                <div class="input-group">
+                    <label for="debt">Energy debt amount (£) - leave blank if none</label>
+                    <input type="number" id="debt" placeholder="e.g., 800" min="0">
+                    <p class="info-text">BGET can help with debts between £250 - £1,500</p>
+                </div>
+            </div>
+
+            <!-- Question 7: EPC & Council Tax -->
+            <div class="question" data-question="7">
+                <div class="question-number">Question 7 of 7</div>
+                <h2>Property information</h2>
+                <div class="input-group">
+                    <label for="epc">Do you know your EPC rating?</label>
+                    <select id="epc">
+                        <option value="">Select...</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                        <option value="F">F</option>
+                        <option value="G">G</option>
+                        <option value="unknown">Don't know</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="councilTax">Council Tax Band</label>
+                    <select id="councilTax">
+                        <option value="">Select...</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                        <option value="F">F</option>
+                        <option value="G">G</option>
+                        <option value="H">H</option>
+                        <option value="unknown">Don't know</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" id="backBtn" style="display: none;">Back</button>
+                <button class="btn btn-primary" id="nextBtn">Next</button>
+            </div>
+        </div>
+
+        <div id="results" class="results"></div>
+    </div>
+
+    <script>
+        // App data
+        const appData = {
+            currentQuestion: 1,
+            totalQuestions: 7,
+            answers: {}
+        };
+
+        // Grant eligibility logic
+        function checkEligibility() {
+            const results = [];
+            const { answers } = appData;
+
+            const hasBenefits = answers.benefits && answers.benefits.length > 0 && !answers.benefits.includes('none');
+            const income = parseInt(answers.income) || 0;
+            const debt = parseInt(answers.debt) || 0;
+            const household = answers.household || [];
+            const epc = answers.epc;
+            const councilTax = answers.councilTax;
+            const isHomeowner = answers.ownership === 'homeowner';
+
+            // BGET - British Gas Energy Trust
+            const bgetEligible =
+                debt >= 250 && debt <= 1500 &&
+                (income < 16190 ||
+                 (income >= 16190 && (household.includes('3-plus-children') || household.includes('pip-dla') || household.includes('carer'))));
+
+            results.push({
+                name: 'British Gas Energy Trust (BGET)',
+                eligible: bgetEligible || answers.situation === 'not-sure',
+                description: 'Grants to help clear energy debt',
+                benefits: [
+                    'Clear gas or electricity debts between £250-£1,500',
+                    'Sometimes helps with bankruptcy costs',
+                    'Essential household items via FAPs'
+                ],
+                link: 'https://www.britishgasenergytrust.org.uk',
+                linkText: 'Apply to BGET',
+                notes: bgetEligible ? 'You appear to meet the eligibility criteria. You must seek money advice before applying.' : 'Debt must be £250-£1,500 and meet income/household criteria'
+            });
+
+            // LEAP - Boiler Replacement
+            const leapBoilerEligible =
+                answers.situation === 'broken-boiler' &&
+                isHomeowner &&
+                hasBenefits &&
+                (household.includes('over-65') || household.includes('under-5') || household.includes('health-condition'));
+
+            const leapAdviceEligible = hasBenefits || income < 31000;
+
+            results.push({
+                name: 'LEAP - Emergency Boiler Replacement',
+                eligible: leapBoilerEligible || answers.situation === 'not-sure',
+                description: 'Free boiler replacement for those in no-heat situations',
+                benefits: [
+                    'Free boiler replacement for emergency no-heat situations',
+                    'Must be homeowner on means-tested benefits',
+                    'Must have vulnerable person in household (65+, under 5, or health condition)'
+                ],
+                link: 'https://applyforleap.org.uk',
+                linkText: 'Contact for LEAP Referral',
+                notes: leapBoilerEligible ? 'Staff must apply on your behalf - contact British Gas' : 'Only for homeowners with broken boilers meeting specific criteria'
+            });
+
+            results.push({
+                name: 'LEAP - Energy Advice Service',
+                eligible: leapAdviceEligible || answers.situation === 'not-sure',
+                description: 'Free energy and money saving advice',
+                benefits: [
+                    'Energy advice to reduce bills',
+                    'Money saving guidance',
+                    'Help staying warm'
+                ],
+                link: 'https://applyforleap.org.uk',
+                linkText: 'Get Energy Advice',
+                notes: leapAdviceEligible ? 'Free advice available' : 'Available to those on benefits or income under £31,000'
+            });
+
+            // Help4Homes
+            const h4hEligible = hasBenefits || answers.prepaymentMeter || (income > 0 && debt > income * 0.15);
+
+            results.push({
+                name: 'Help4Homes',
+                eligible: h4hEligible || answers.situation === 'not-sure',
+                description: 'Comprehensive energy support including advice, assessments, and installations',
+                benefits: [
+                    'Energy advice and benefits entitlement checks',
+                    'Home energy assessments',
+                    'Cavity wall & loft insulation',
+                    'Solar PV systems',
+                    'Gas boilers (if vulnerable household member)',
+                    'White goods'
+                ],
+                link: 'https://www.britishgas.co.uk/energy/help4homes',
+                linkText: 'Apply for Help4Homes',
+                notes: h4hEligible ? 'Wide range of support available' : 'For those on means-tested benefits or with high energy costs'
+            });
+
+            // ECO4
+            const ecoEligible =
+                isHomeowner &&
+                hasBenefits &&
+                (epc === 'D' || epc === 'E' || epc === 'F' || epc === 'G' || epc === 'unknown');
+
+            results.push({
+                name: 'ECO4 Scheme',
+                eligible: ecoEligible || answers.situation === 'not-sure',
+                description: 'Home improvement measures from insulation to heat pumps',
+                benefits: [
+                    'Loft and wall insulation',
+                    'Air source heat pumps',
+                    'Heating system upgrades',
+                    'Package of energy efficiency measures'
+                ],
+                link: 'https://www.britishgas.co.uk/energy/eco-scheme',
+                linkText: 'Apply for ECO4',
+                notes: ecoEligible ? 'You may qualify for home improvements' : 'Need to be homeowner on benefits with EPC D or lower'
+            });
+
+            // GBIS
+            const gbisEligible =
+                (epc === 'D' || epc === 'E' || epc === 'F' || epc === 'G' || epc === 'unknown') &&
+                (councilTax === 'A' || councilTax === 'B' || councilTax === 'C' || councilTax === 'D' || councilTax === 'E');
+
+            results.push({
+                name: 'Great British Insulation Scheme (GBIS)',
+                eligible: gbisEligible || answers.situation === 'not-sure',
+                description: 'Funding for single insulation measures',
+                benefits: [
+                    'Cavity wall insulation (usually free)',
+                    'Loft insulation',
+                    'Other insulation types (may require contribution)'
+                ],
+                link: 'https://www.britishgas.co.uk/energy/eco-scheme',
+                linkText: 'Apply for GBIS',
+                notes: gbisEligible ? 'You may qualify for insulation support' : 'Need EPC D or lower and council tax band A-D (England) or A-E (Scotland/Wales)'
+            });
+
+            return results;
+        }
+
+        // Display results
+        function displayResults() {
+            const results = checkEligibility();
+            const eligibleResults = results.filter(r => r.eligible);
+            const notEligibleResults = results.filter(r => !r.eligible);
+
+            let html = '<div class="card"><h2>Your Results</h2><p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Based on your answers, here are the schemes you may be eligible for:</p>';
+
+            if (eligibleResults.length === 0) {
+                html += '<div class="no-results"><p>No schemes match your current situation perfectly, but you may still want to review the options below or contact British Gas for personalized advice.</p></div>';
+            }
+
+            // Show eligible schemes first
+            eligibleResults.forEach(grant => {
+                html += `
+                    <div class="grant-card">
+                        <h3>${grant.name}</h3>
+                        <span class="status eligible">✓ You may be eligible</span>
+                        <p style="margin: 1rem 0;">${grant.description}</p>
+                        <strong>What this offers:</strong>
+                        <ul>
+                            ${grant.benefits.map(b => `<li>${b}</li>`).join('')}
+                        </ul>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 1rem;"><strong>Note:</strong> ${grant.notes}</p>
+                        <a href="${grant.link}" class="grant-link" target="_blank">${grant.linkText} →</a>
+                    </div>
+                `;
+            });
+
+            // Show ineligible schemes
+            if (notEligibleResults.length > 0 && eligibleResults.length > 0) {
+                html += '<h3 style="margin: 2rem 0 1rem; color: var(--text-secondary);">Other schemes (criteria not met):</h3>';
+            }
+
+            notEligibleResults.forEach(grant => {
+                html += `
+                    <div class="grant-card not-eligible">
+                        <h3>${grant.name}</h3>
+                        <span class="status not-eligible">Criteria not met</span>
+                        <p style="margin: 1rem 0;">${grant.description}</p>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);"><strong>Why you may not qualify:</strong> ${grant.notes}</p>
+                    </div>
+                `;
+            });
+
+            html += `
+                <button class="btn btn-primary restart-btn" onclick="restartQuestionnaire()">Start Over</button>
+                <p style="text-align: center; color: var(--text-secondary); margin-top: 1rem; font-size: 0.9rem;">
+                    Need help? Email: <a href="mailto:eco.referrals@britishgas.co.uk">eco.referrals@britishgas.co.uk</a>
+                </p>
+            </div>`;
+
+            document.getElementById('results').innerHTML = html;
+            document.getElementById('results').classList.add('active');
+            document.getElementById('questionnaire').style.display = 'none';
+        }
+
+        // Navigation
+        function updateProgress() {
+            const progress = ((appData.currentQuestion - 1) / appData.totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showQuestion(questionNum) {
+            document.querySelectorAll('.question').forEach(q => q.classList.remove('active'));
+            document.querySelector(`[data-question="${questionNum}"]`).classList.add('active');
+
+            document.getElementById('backBtn').style.display = questionNum > 1 ? 'block' : 'none';
+            document.getElementById('nextBtn').textContent = questionNum === appData.totalQuestions ? 'See Results' : 'Next';
+
+            updateProgress();
+        }
+
+        function nextQuestion() {
+            if (appData.currentQuestion === appData.totalQuestions) {
+                displayResults();
+            } else {
+                appData.currentQuestion++;
+                showQuestion(appData.currentQuestion);
+            }
+        }
+
+        function previousQuestion() {
+            if (appData.currentQuestion > 1) {
+                appData.currentQuestion--;
+                showQuestion(appData.currentQuestion);
+            }
+        }
+
+        function restartQuestionnaire() {
+            appData.currentQuestion = 1;
+            appData.answers = {};
+
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('questionnaire').style.display = 'block';
+
+            // Reset all inputs
+            document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.closest('.checkbox-label').classList.remove('checked');
+            });
+            document.getElementById('income').value = '';
+            document.getElementById('debt').value = '';
+            document.getElementById('epc').value = '';
+            document.getElementById('councilTax').value = '';
+
+            showQuestion(1);
+            window.scrollTo(0, 0);
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Option buttons
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const question = e.target.closest('.question');
+                    const questionNum = question.dataset.question;
+
+                    question.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                    e.target.classList.add('selected');
+
+                    if (questionNum === '1') {
+                        appData.answers.situation = e.target.dataset.value;
+                    } else if (questionNum === '2') {
+                        appData.answers.ownership = e.target.dataset.value;
+                    }
+
+                    setTimeout(nextQuestion, 200);
+                });
+            });
+
+            // Checkboxes with styling
+            document.querySelectorAll('.checkbox-label').forEach(label => {
+                const checkbox = label.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        label.classList.add('checked');
+                    } else {
+                        label.classList.remove('checked');
+                    }
+                });
+            });
+
+            // Benefits checkboxes
+            document.querySelectorAll('input[name="benefits"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const selectedBenefits = Array.from(document.querySelectorAll('input[name="benefits"]:checked'))
+                        .map(cb => cb.value);
+
+                    if (selectedBenefits.includes('none')) {
+                        document.querySelectorAll('input[name="benefits"]').forEach(c => {
+                            if (c.value !== 'none') {
+                                c.checked = false;
+                                c.closest('.checkbox-label').classList.remove('checked');
+                            }
+                        });
+                        appData.answers.benefits = ['none'];
+                    } else {
+                        document.querySelector('input[name="benefits"][value="none"]').checked = false;
+                        document.querySelector('input[name="benefits"][value="none"]').closest('.checkbox-label').classList.remove('checked');
+                        appData.answers.benefits = selectedBenefits;
+                    }
+                });
+            });
+
+            // Household checkboxes
+            document.querySelectorAll('input[name="household"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const selectedHousehold = Array.from(document.querySelectorAll('input[name="household"]:checked'))
+                        .map(cb => cb.value);
+
+                    if (selectedHousehold.includes('none')) {
+                        document.querySelectorAll('input[name="household"]').forEach(c => {
+                            if (c.value !== 'none') {
+                                c.checked = false;
+                                c.closest('.checkbox-label').classList.remove('checked');
+                            }
+                        });
+                        appData.answers.household = ['none'];
+                    } else {
+                        document.querySelector('input[name="household"][value="none"]').checked = false;
+                        document.querySelector('input[name="household"][value="none"]').closest('.checkbox-label').classList.remove('checked');
+                        appData.answers.household = selectedHousehold;
+                    }
+                });
+            });
+
+            // Income input
+            document.getElementById('income').addEventListener('change', (e) => {
+                appData.answers.income = e.target.value;
+            });
+
+            // Debt input
+            document.getElementById('debt').addEventListener('change', (e) => {
+                appData.answers.debt = e.target.value;
+            });
+
+            // EPC select
+            document.getElementById('epc').addEventListener('change', (e) => {
+                appData.answers.epc = e.target.value;
+            });
+
+            // Council Tax select
+            document.getElementById('councilTax').addEventListener('change', (e) => {
+                appData.answers.councilTax = e.target.value;
+            });
+
+            // Navigation buttons
+            document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+            document.getElementById('backBtn').addEventListener('click', previousQuestion);
+
+            updateProgress();
+        });
+
+        // PWA Installation
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').classList.add('show');
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    deferredPrompt = null;
+                    document.getElementById('installPrompt').classList.remove('show');
+                });
+            }
+        }
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .catch(err => console.log('SW registration failed'));
+            });
+        }
+    </script>
+</body>
+</html>
