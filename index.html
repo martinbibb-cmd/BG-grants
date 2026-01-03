@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0066CC">
-    <meta name="description" content="British Gas Grant Finder - Find support schemes quickly">
+    <meta name="description" content="UK Energy Grant Finder - Find all available energy grants including ECO4, GBIS, Warm Home Discount, Winter Fuel Payment and more">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.svg">
     <link rel="icon" type="image/svg+xml" href="icon-192.svg">
-    <title>BG Grant Finder</title>
+    <title>UK Energy Grant Finder</title>
     <style>
         * {
             margin: 0;
@@ -496,8 +496,8 @@
 </head>
 <body>
     <div class="header">
-        <h1>🏠 BG Grant Finder</h1>
-        <p>Find the right support scheme in minutes</p>
+        <h1>🏠 UK Energy Grant Finder</h1>
+        <p>Find the right support scheme in minutes - covering all UK energy grants</p>
     </div>
 
     <div class="container">
@@ -719,6 +719,8 @@
             const epc = answers.epc;
             const councilTax = answers.councilTax;
             const isHomeowner = answers.ownership === 'homeowner';
+            const hasVulnerable = household.includes('over-65') || household.includes('under-5') || household.includes('health-condition');
+            const hasPensionCredit = answers.benefits && answers.benefits.includes('pension-credit');
 
             // BGET - British Gas Energy Trust
             const bgetEligible =
@@ -745,7 +747,7 @@
                 answers.situation === 'broken-boiler' &&
                 isHomeowner &&
                 hasBenefits &&
-                (household.includes('over-65') || household.includes('under-5') || household.includes('health-condition'));
+                hasVulnerable;
 
             const leapAdviceEligible = hasBenefits || income < 31000;
 
@@ -777,7 +779,7 @@
                 notes: leapAdviceEligible ? 'Free advice available' : 'Available to those on benefits or income under £31,000'
             });
 
-            // Help4Homes
+            // Help4Homes (FIXED URL)
             const h4hEligible = hasBenefits || answers.prepaymentMeter || (income > 0 && debt > income * 0.15);
 
             results.push({
@@ -792,12 +794,12 @@
                     'Gas boilers (if vulnerable household member)',
                     'White goods'
                 ],
-                link: 'https://www.britishgas.co.uk/energy/help4homes',
+                link: 'https://www.help4homes.co.uk/',
                 linkText: 'Apply for Help4Homes',
                 notes: h4hEligible ? 'Wide range of support available' : 'For those on means-tested benefits or with high energy costs'
             });
 
-            // ECO4
+            // ECO4 (FIXED URL)
             const ecoEligible =
                 isHomeowner &&
                 hasBenefits &&
@@ -813,12 +815,12 @@
                     'Heating system upgrades',
                     'Package of energy efficiency measures'
                 ],
-                link: 'https://www.britishgas.co.uk/energy/eco-scheme',
+                link: 'https://www.britishgas.co.uk/heating/home-insulation/eco-scheme.html',
                 linkText: 'Apply for ECO4',
                 notes: ecoEligible ? 'You may qualify for home improvements' : 'Need to be homeowner on benefits with EPC D or lower'
             });
 
-            // GBIS
+            // GBIS (FIXED URL)
             const gbisEligible =
                 (epc === 'D' || epc === 'E' || epc === 'F' || epc === 'G' || epc === 'unknown') &&
                 (councilTax === 'A' || councilTax === 'B' || councilTax === 'C' || councilTax === 'D' || councilTax === 'E');
@@ -832,9 +834,99 @@
                     'Loft insulation',
                     'Other insulation types (may require contribution)'
                 ],
-                link: 'https://www.britishgas.co.uk/energy/eco-scheme',
+                link: 'https://www.britishgas.co.uk/heating/home-insulation/eco-scheme.html',
                 linkText: 'Apply for GBIS',
                 notes: gbisEligible ? 'You may qualify for insulation support' : 'Need EPC D or lower and council tax band A-D (England) or A-E (Scotland/Wales)'
+            });
+
+            // Warm Home Discount - UK Government Scheme
+            const whdEligible = hasBenefits || hasPensionCredit;
+
+            results.push({
+                name: 'Warm Home Discount',
+                eligible: whdEligible || answers.situation === 'not-sure',
+                description: '£150 off electricity bill (automatic payment)',
+                benefits: [
+                    '£150 discount on electricity bills',
+                    'Applied automatically between November-March',
+                    'No application needed if eligible',
+                    'For households on means-tested benefits'
+                ],
+                link: 'https://www.gov.uk/the-warm-home-discount-scheme',
+                linkText: 'Check Eligibility',
+                notes: whdEligible ? 'Payments are automatic - check with your energy supplier' : 'Available to those on Pension Credit or certain means-tested benefits'
+            });
+
+            // Winter Fuel Payment
+            const winterFuelEligible = household.includes('over-65');
+
+            results.push({
+                name: 'Winter Fuel Payment',
+                eligible: winterFuelEligible || answers.situation === 'not-sure',
+                description: '£200-£300 to help with winter heating bills',
+                benefits: [
+                    '£200-£300 payment for winter heating',
+                    'For those born before 22 September 1959',
+                    'Must be claiming certain benefits',
+                    'Claim by 31 March 2026'
+                ],
+                link: 'https://www.gov.uk/winter-fuel-payment',
+                linkText: 'Apply for Winter Fuel Payment',
+                notes: winterFuelEligible ? 'You may be eligible - check if you claim qualifying benefits' : 'Only for those over pension age claiming certain benefits'
+            });
+
+            // Cold Weather Payment
+            const coldWeatherEligible = hasBenefits;
+
+            results.push({
+                name: 'Cold Weather Payment',
+                eligible: coldWeatherEligible || answers.situation === 'not-sure',
+                description: '£25 for each 7-day cold period',
+                benefits: [
+                    '£25 per seven-day period of freezing weather',
+                    'Automatic payments (no application needed)',
+                    'November 2025 to March 2026',
+                    'For those on certain benefits'
+                ],
+                link: 'https://www.gov.uk/cold-weather-payment',
+                linkText: 'Check Eligibility',
+                notes: coldWeatherEligible ? 'Payments are automatic if you qualify' : 'Available to those on Pension Credit, Income Support, or other qualifying benefits'
+            });
+
+            // Boiler Upgrade Scheme
+            const busEligible = isHomeowner && answers.situation === 'home-improvements';
+
+            results.push({
+                name: 'Boiler Upgrade Scheme',
+                eligible: busEligible || answers.situation === 'not-sure',
+                description: 'Up to £7,500 grant for heat pump installation',
+                benefits: [
+                    '£7,500 for air source or ground source heat pump',
+                    '£5,000 for biomass boiler',
+                    'Installer applies on your behalf',
+                    'Must use MCS-certified installer'
+                ],
+                link: 'https://www.gov.uk/apply-boiler-upgrade-scheme',
+                linkText: 'Find BUS Installer',
+                notes: busEligible ? 'Find an MCS-certified installer to apply' : 'For property owners replacing fossil fuel heating with low-carbon systems'
+            });
+
+            // Household Support Fund
+            const hsfEligible = hasBenefits || income < 25000 || debt > 0;
+
+            results.push({
+                name: 'Household Support Fund',
+                eligible: hsfEligible || answers.situation === 'not-sure',
+                description: 'Local council emergency support for energy, food, and essentials',
+                benefits: [
+                    'Help with energy and water bills',
+                    'Food vouchers',
+                    'Support with essential items',
+                    'Small cash payments (varies by council)'
+                ],
+                link: 'https://www.gov.uk/cost-of-living/get-help-with-bills',
+                linkText: 'Find Your Local Council',
+                notes: hsfEligible ? 'Contact your local council - eligibility varies by area' : 'Check with your local council for specific eligibility criteria'
             });
 
             return results;

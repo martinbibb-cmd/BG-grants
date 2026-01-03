@@ -1,7 +1,7 @@
 {
-  "name": "BG Grant Finder",
-  "short_name": "Grants",
-  "description": "Find British Gas support schemes quickly",
+  "name": "UK Energy Grant Finder",
+  "short_name": "UK Grants",
+  "description": "Find all UK energy grants and support schemes",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
