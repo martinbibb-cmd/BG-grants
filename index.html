@@ -282,6 +282,31 @@
             color: var(--text-secondary);
         }
 
+        .scheme-status {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .scheme-open {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .scheme-closing {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .scheme-closed {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
         .grant-card ul {
             margin: 1rem 0;
             padding-left: 1.5rem;
@@ -731,6 +756,7 @@
             results.push({
                 name: 'British Gas Energy Trust (BGET)',
                 eligible: bgetEligible || answers.situation === 'not-sure',
+                status: 'Open',
                 description: 'Grants to help clear energy debt',
                 benefits: [
                     'Clear gas or electricity debts between £250-£1,500',
@@ -754,6 +780,7 @@
             results.push({
                 name: 'LEAP - Emergency Boiler Replacement',
                 eligible: leapBoilerEligible || answers.situation === 'not-sure',
+                status: 'Open',
                 description: 'Free boiler replacement for those in no-heat situations',
                 benefits: [
                     'Free boiler replacement for emergency no-heat situations',
@@ -768,6 +795,7 @@
             results.push({
                 name: 'LEAP - Energy Advice Service',
                 eligible: leapAdviceEligible || answers.situation === 'not-sure',
+                status: 'Open',
                 description: 'Free energy and money saving advice',
                 benefits: [
                     'Energy advice to reduce bills',
@@ -785,6 +813,7 @@
             results.push({
                 name: 'Help4Homes',
                 eligible: h4hEligible || answers.situation === 'not-sure',
+                status: 'Open',
                 description: 'Comprehensive energy support including advice, assessments, and installations',
                 benefits: [
                     'Energy advice and benefits entitlement checks',
@@ -808,6 +837,7 @@
             results.push({
                 name: 'ECO4 Scheme',
                 eligible: ecoEligible || answers.situation === 'not-sure',
+                status: 'Closing Soon',
                 description: 'Home improvement measures from insulation to heat pumps',
                 benefits: [
                     'Loft and wall insulation',
@@ -817,7 +847,7 @@
                 ],
                 link: 'https://www.britishgas.co.uk/heating/home-insulation/eco-scheme.html',
                 linkText: 'Apply for ECO4',
-                notes: ecoEligible ? 'You may qualify for home improvements' : 'Need to be homeowner on benefits with EPC D or lower'
+                notes: ecoEligible ? 'You may qualify for home improvements. ENDS MARCH 2026 - many suppliers already stopped accepting applications.' : 'Need to be homeowner on benefits with EPC D or lower. Scheme closing March 2026.'
             });
 
             // GBIS (FIXED URL)
@@ -828,6 +858,7 @@
             results.push({
                 name: 'Great British Insulation Scheme (GBIS)',
                 eligible: gbisEligible || answers.situation === 'not-sure',
+                status: 'Closed',
                 description: 'Funding for single insulation measures',
                 benefits: [
                     'Cavity wall insulation (usually free)',
@@ -836,7 +867,7 @@
                 ],
                 link: 'https://www.britishgas.co.uk/heating/home-insulation/eco-scheme.html',
                 linkText: 'Apply for GBIS',
-                notes: gbisEligible ? 'You may qualify for insulation support' : 'Need EPC D or lower and council tax band A-D (England) or A-E (Scotland/Wales)'
+                notes: 'SCHEME CLOSED - GOV.UK referral service closed October 2025. Some energy providers may accept applications until late January 2026.'
             });
 
             // Warm Home Discount - UK Government Scheme
@@ -845,6 +876,7 @@
             results.push({
                 name: 'Warm Home Discount',
                 eligible: whdEligible || answers.situation === 'not-sure',
+                status: 'Closing Soon',
                 description: '£150 off electricity bill (automatic payment)',
                 benefits: [
                     '£150 discount on electricity bills',
@@ -854,7 +886,7 @@
                 ],
                 link: 'https://www.gov.uk/the-warm-home-discount-scheme',
                 linkText: 'Check Eligibility',
-                notes: whdEligible ? 'Payments are automatic - check with your energy supplier' : 'Available to those on Pension Credit or certain means-tested benefits'
+                notes: whdEligible ? 'Payments are automatic - check with your energy supplier. Must claim by 27 February 2026.' : 'Available to those on Pension Credit or certain means-tested benefits. Deadline: 27 February 2026.'
             });
 
             // Winter Fuel Payment
@@ -863,6 +895,7 @@
             results.push({
                 name: 'Winter Fuel Payment',
                 eligible: winterFuelEligible || answers.situation === 'not-sure',
+                status: 'Closing Soon',
                 description: '£200-£300 to help with winter heating bills',
                 benefits: [
                     '£200-£300 payment for winter heating',
@@ -872,7 +905,7 @@
                 ],
                 link: 'https://www.gov.uk/winter-fuel-payment',
                 linkText: 'Apply for Winter Fuel Payment',
-                notes: winterFuelEligible ? 'You may be eligible - check if you claim qualifying benefits' : 'Only for those over pension age claiming certain benefits'
+                notes: winterFuelEligible ? 'You may be eligible - check if you claim qualifying benefits. DEADLINE: 31 March 2026.' : 'Only for those over pension age claiming certain benefits. Deadline: 31 March 2026.'
             });
 
             // Cold Weather Payment
@@ -881,6 +914,7 @@
             results.push({
                 name: 'Cold Weather Payment',
                 eligible: coldWeatherEligible || answers.situation === 'not-sure',
+                status: 'Closing Soon',
                 description: '£25 for each 7-day cold period',
                 benefits: [
                     '£25 per seven-day period of freezing weather',
@@ -890,7 +924,7 @@
                 ],
                 link: 'https://www.gov.uk/cold-weather-payment',
                 linkText: 'Check Eligibility',
-                notes: coldWeatherEligible ? 'Payments are automatic if you qualify' : 'Available to those on Pension Credit, Income Support, or other qualifying benefits'
+                notes: coldWeatherEligible ? 'Payments are automatic if you qualify. Seasonal scheme ends 31 March 2026.' : 'Available to those on Pension Credit, Income Support, or other qualifying benefits. Ends 31 March 2026.'
             });
 
             // Boiler Upgrade Scheme
@@ -899,6 +933,7 @@
             results.push({
                 name: 'Boiler Upgrade Scheme',
                 eligible: busEligible || answers.situation === 'not-sure',
+                status: 'Open',
                 description: 'Up to £7,500 grant for heat pump installation',
                 benefits: [
                     '£7,500 for air source or ground source heat pump',
@@ -917,6 +952,7 @@
             results.push({
                 name: 'Household Support Fund',
                 eligible: hsfEligible || answers.situation === 'not-sure',
+                status: 'Closing Soon',
                 description: 'Local council emergency support for energy, food, and essentials',
                 benefits: [
                     'Help with energy and water bills',
@@ -926,7 +962,7 @@
                 ],
                 link: 'https://www.gov.uk/cost-of-living/get-help-with-bills',
                 linkText: 'Find Your Local Council',
-                notes: hsfEligible ? 'Contact your local council - eligibility varies by area' : 'Check with your local council for specific eligibility criteria'
+                notes: hsfEligible ? 'Contact your local council - eligibility varies by area. ENDS 31 March 2026.' : 'Check with your local council for specific eligibility criteria. Scheme ends 31 March 2026.'
             });
 
             return results;
@@ -946,9 +982,11 @@
 
             // Show eligible schemes first
             eligibleResults.forEach(grant => {
+                const statusClass = grant.status === 'Open' ? 'scheme-open' : grant.status === 'Closing Soon' ? 'scheme-closing' : 'scheme-closed';
+                const statusIcon = grant.status === 'Open' ? '🟢' : grant.status === 'Closing Soon' ? '🟡' : '🔴';
                 html += `
                     <div class="grant-card">
-                        <h3>${grant.name}</h3>
+                        <h3>${grant.name} <span class="scheme-status ${statusClass}">${statusIcon} ${grant.status}</span></h3>
                         <span class="status eligible">✓ You may be eligible</span>
                         <p style="margin: 1rem 0;">${grant.description}</p>
                         <strong>What this offers:</strong>
@@ -967,9 +1005,11 @@
             }
 
             notEligibleResults.forEach(grant => {
+                const statusClass = grant.status === 'Open' ? 'scheme-open' : grant.status === 'Closing Soon' ? 'scheme-closing' : 'scheme-closed';
+                const statusIcon = grant.status === 'Open' ? '🟢' : grant.status === 'Closing Soon' ? '🟡' : '🔴';
                 html += `
                     <div class="grant-card not-eligible">
-                        <h3>${grant.name}</h3>
+                        <h3>${grant.name} <span class="scheme-status ${statusClass}">${statusIcon} ${grant.status}</span></h3>
                         <span class="status not-eligible">Criteria not met</span>
                         <p style="margin: 1rem 0;">${grant.description}</p>
                         <p style="font-size: 0.9rem; color: var(--text-secondary);"><strong>Why you may not qualify:</strong> ${grant.notes}</p>
