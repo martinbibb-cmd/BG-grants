@@ -590,6 +590,41 @@
         .app-footer a:hover {
             text-decoration: underline;
         }
+
+        .boiler-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .boiler-table td {
+            padding: 0.3rem 0.25rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        .boiler-table td:first-child {
+            color: var(--text-secondary);
+            white-space: nowrap;
+            padding-right: 0.5rem;
+        }
+
+        .boiler-table td:last-child {
+            text-align: right;
+            white-space: nowrap;
+            font-weight: 500;
+            color: var(--bg-success);
+        }
+
+        .boiler-category {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--bg-primary);
+            margin: 1rem 0 0.5rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 2px solid var(--bg-primary);
+        }
     </style>
 </head>
 <body>
@@ -662,6 +697,16 @@
             <div class="nav-buttons">
                 <button class="btn btn-secondary" onclick="prevIntro()">Back</button>
                 <button class="btn btn-primary" onclick="startQuestions()">Start questionnaire</button>
+            </div>
+        </section>
+
+        <!-- Boiler Prices page -->
+        <section id="boiler-prices" class="intro-page card">
+            <h2>Boiler Price Reference</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.9rem;">Prices shown where available. Items without a price are not currently priced.</p>
+            <div id="boiler-prices-content"></div>
+            <div style="margin-top: 1rem;">
+                <button class="btn btn-secondary" onclick="returnFromIntro()" style="width:100%;">← Return</button>
             </div>
         </section>
 
@@ -859,7 +904,8 @@
         <footer class="app-footer">
             <a href="#" onclick="openIntroPage(0); return false;">About</a> ·
             <a href="#" onclick="openIntroPage(1); return false;">What it is not</a> ·
-            <a href="#" onclick="openIntroPage(2); return false;">Data &amp; privacy</a>
+            <a href="#" onclick="openIntroPage(2); return false;">Data &amp; privacy</a> ·
+            <a href="#" onclick="openBoilerPrices(); return false;">Boiler Prices</a>
         </footer>
     </div>
 
@@ -869,6 +915,245 @@
         let mode = 'intro';
         let lastModeBeforeIntro = null;
         let lastQuestionIndex = 1;
+
+        // Boiler price reference data
+        const boilerData = [
+            { category: 'Combi Natural Gas', boilers: [
+                ['CBLR3446', 'Worcester Greenstar 32CDi Compact', '£1,541.88'],
+                ['CBLR3447', 'Worcester Greenstar 36CDi Compact', '£1,670.24'],
+                ['CBLR3562', 'Worcester Greenstar 8000+ 40kW Combi NG', '£1,967.60'],
+                ['CBLR3532', 'Worcester Greenstar 8000 Life 50kW Combi', null],
+                ['CBLR3434', 'Vaillant ecoTEC+ 825', null],
+                ['CBLR3420', 'Vaillant ecoFIT pure 825', '£1,188.24'],
+                ['CBLR3421', 'Vaillant ecoFIT pure 830', '£1,333.01'],
+                ['CBLR3422', 'Vaillant ecoFIT pure 835', '£1,574.30'],
+                ['CBLR3437', 'Vaillant ecoTEC+ 835', null],
+                ['CBLR3438', 'Vaillant ecoTEC+ 838', null],
+                ['CBLR3439', 'Vaillant ecoTEC pro 24', '£1,118.35'],
+                ['CBLR3440', 'Vaillant ecoTEC pro 28', '£1,183.79'],
+                ['CBLR3385', 'Vaillant ecoTEC pro 30 ErP', '£1,238.62'],
+                ['CBLR3382', 'Glowworm Energy7 25c ErP', '£1,030.33'],
+                ['CBLR3383', 'Glowworm Energy7 30c ErP', '£1,140.94'],
+                ['CBLR3384', 'Glowworm Energy7 35c ErP', '£1,401.54'],
+                ['CBLR1390', 'Worcester Greenstar Highflow 440 CDi ErP', '£2,458.39'],
+                ['CBLR3444', 'Worcester Greenstar Highflow 550CDi', null],
+                ['CBLR3600', 'Worcester Greenstar 4000 25kW Combi NG', '£1,176.65'],
+                ['CBLR3602', 'Worcester Greenstar 4000 30kW Combi NG', '£1,392.66'],
+                ['CBLR3504', 'Worcester Greenstar 8000 Style 50kW Combi (White and Chrome)', null],
+                ['CBLR3503', 'Worcester Greenstar 8000 Style 45kW Combi (White and Chrome)', null],
+                ['CBLR3508', 'Worcester Greenstar 8000 Style 45kW Combi (Black and Chrome)', null],
+                ['CBLR3509', 'Worcester Greenstar 8000 Style 50kW Combi (Black and Chrome)', null],
+                ['CBLR3506', 'Worcester Greenstar 8000 Style 35kW Combi (Black and Chrome)', null],
+                ['CBLR3561', 'Worcester Greenstar 8000+ 36kW Combi NG', '£1,772.80'],
+                ['CBLR3563', 'Worcester Greenstar 8000+ 45kW Combi NG', '£2,257.20'],
+                ['CBLR3564', 'Worcester Greenstar 8000+ 50kW Combi NG', '£2,371.80'],
+                ['CBLR3701', 'Viessmann Vitodens 100-W 16 kW', null],
+                ['CBLR3000', 'Keston Combi 2 C30 Combination Boiler', '£1,812.97'],
+                ['CBLR3001', 'Keston Combi 2 C35 Combination Boiler', '£2,026.40'],
+                ['CBLR1912', 'Ideal Logic Combi2 C24 Boiler', '£1,246.73'],
+                ['CBLR1913', 'Ideal Logic Combi2 C30 Boiler', '£1,331.86'],
+                ['CBLR1914', 'Ideal Logic Combi2 C35 Boiler', '£1,482.61'],
+                ['CBLR3459', 'Worcester Greenstar 28CDi Compact', '£1,303.01'],
+                ['CBLR3463', 'Vaillant ecoTEC Exclusive 35kW Combi Boiler', null],
+                ['CBLR3464', 'Vaillant ecoTEC Exclusive 43kW Combi Boiler', null],
+                ['CBLR3500', 'Worcester Greenstar 8000 Style 30kW Combi (White and Chrome)', null],
+                ['CBLR3710', 'Ariston Clas One 24', null],
+                ['CBLR3712', 'Ariston Clas One 38', null],
+                ['CBLR3711', 'Ariston Clas One 30', null],
+                ['CBLR3560', 'Worcester Greenstar 8000+ 32kW Combi NG', '£1,638.40'],
+                ['CBLR3565', 'Worcester Greenstar 8000+ Style 32kW Combi NG', '£1,797.60'],
+                ['CBLR3566', 'Worcester Greenstar 8000+ Style 36kW Combi NG', '£1,932.00'],
+                ['CBLR3574', 'Worcester Greenstar 8000+ 30kW Regular NG', '£1,809.80'],
+                ['CBLR6510', 'Viessmann Vitodens 050-W 25kw Combi B0KA', '£1,162.48'],
+                ['CBLR6511', 'Viessmann Vitodens 050-W 30kw Combi B0KA', '£1,145.10'],
+                ['CBLR6512', 'Viessmann Vitodens 050-W 35kw Combi B0KA', '£1,287.00'],
+                ['CBLR6515', 'Viessmann Vitodens 100-W 26 kW Combi Boiler B1KF', '£1,467.34'],
+                ['CBLR6516', 'Viessmann Vitodens 100-W 30 kW Combi Boiler B1KF', '£1,551.00'],
+                ['CBLR6517', 'Viessmann Vitodens 100-W 35 kW Combi Boiler B1KF', '£1,608.00'],
+                ['CBLR3593', 'Worcester Bosch Greenstar 8000 F 50kW Combi NG', '£3,234.90']
+            ]},
+            { category: 'Combi LPG', boilers: [
+                ['CBLR1370', 'Worcester Greenstar 32CDi Compact ErP LPG', '£1,628.75'],
+                ['CBLR1371', 'Worcester Greenstar 36CDi Compact ErP LPG', '£1,714.45'],
+                ['CBLR3514', 'Worcester Greenstar 8000 Style 30kW Combi LPG (White and Chrome)', null],
+                ['CBLR3516', 'Worcester Greenstar 8000 Style 40kW Combi LPG (White and Chrome)', null],
+                ['CBLR3517', 'Worcester Greenstar 8000 Style 45kW Combi LPG (White and Chrome)', null],
+                ['CBLR3518', 'Worcester Greenstar 8000 Style 50kW Combi LPG (White and Chrome)', null],
+                ['CBLR3521', 'Worcester Greenstar 8000 Style 40kW Combi LPG (Black and Chrome)', null],
+                ['CBLR3522', 'Worcester Greenstar 8000 Style 45kW Combi LPG (Black and Chrome)', null],
+                ['CBLR3533', 'Worcester Greenstar 8000 Life 30kW Combi LPG', null],
+                ['CBLR3534', 'Worcester Greenstar 8000 Life 35kW Combi LPG', null],
+                ['CBLR3535', 'Worcester Greenstar 8000 Life 40kW Combi LPG', null],
+                ['CBLR3536', 'Worcester Greenstar 8000 Life 45kW Combi LPG', null],
+                ['CBLR3537', 'Worcester Greenstar 8000 Life 50kW Combi LPG', null],
+                ['CBLR1391', 'Worcester Greenstar Highflow 440 CDi ErP LPG', null],
+                ['CBLR3445', 'Worcester Greenstar Highflow 550CDi LPG', null],
+                ['CBLR3601', 'Worcester Greenstar 4000 25kW Combi LPG', '£1,292.09'],
+                ['CBLR3603', 'Worcester Greenstar 4000 30kW Combi LPG', '£1,403.86'],
+                ['CBLR3519', 'Worcester Greenstar 8000 Style 30kW Combi LPG (Black and Chrome)', null],
+                ['CBLR3520', 'Worcester Greenstar 8000 Style 35kW Combi LPG (Black and Chrome)', null],
+                ['CBLR3515', 'Worcester Greenstar 8000 Style 35kW Combi LPG (White and Chrome)', null],
+                ['CBLR3454', 'Worcester Greenstar Ri 12kW LPG - Regular', '£992.29'],
+                ['CBLR3586', 'Upgrade to Worcester Bosch 4000 30kW (from WB 2000)', null],
+                ['CBLR3587', 'Upgrade to Worcester Bosch 8000+ 36kW (from WB 4000 30kW)', null],
+                ['CBLR3588', 'Upgrade to Worcester Bosch 8000+ 36kW (from WB 2000 25kW)', null],
+                ['CBLR3567', 'Worcester Greenstar 8000+ 32kW Combi LPG', '£1,772.80'],
+                ['CBLR3568', 'Worcester Greenstar 8000+ 36kW Combi LPG', '£1,920.80'],
+                ['CBLR3569', 'Worcester Greenstar 8000+ 40kW Combi LPG', '£2,119.20'],
+                ['CBLR3570', 'Worcester Greenstar 8000+ 45kW Combi LPG', '£2,413.80'],
+                ['CBLR3571', 'Worcester Greenstar 8000+ 50kW Combi LPG', '£2,548.00'],
+                ['CBLR3589', 'Upgrade to Ideal Logic Combi 30kw (From Ideal Logic Combi2 24kW)', null],
+                ['CBLR3590', 'Upgrade to Ideal Logic Combi2 35kw (From Ideal Logic Combi2 24kW)', null],
+                ['CBLR3591', 'Upgrade to Ideal Logic Combi2 35kw (From Ideal Logic Combi2 30kW)', null],
+                ['CBLR3594', 'Worcester Bosch Greenstar 8000 F 35kW Combi LPG', '£2,723.33'],
+                ['CBLR3595', 'Worcester Bosch Greenstar 8000 F 50kW Combi LPG', '£3,346.67'],
+                ['CBLR3598', 'Worcester Bosch Greenstar 8000 F 35kW Regular LPG', '£2,393.03'],
+                ['CBLR3599', 'Worcester Bosch Greenstar 8000 F 50kW Regular LPG', '£3,194.78']
+            ]},
+            { category: 'Conventional Natural Gas', boilers: [
+                ['CBLR3453', 'Worcester Greenstar Ri 12kW - Regular', '£935.16'],
+                ['CBLR3455', 'Worcester Greenstar Ri 15kW - Regular', '£1,003.10'],
+                ['CBLR3457', 'Worcester Greenstar Ri 18kW - Regular', '£1,035.14'],
+                ['CBLR3461', 'Worcester Greenstar Ri 24kW - Regular', '£1,100.40'],
+                ['CBLR1380', 'Worcester Greenstar 30Ri ErP - Regular', '£1,218.35'],
+                ['CBLR1388', 'Worcester Greenstar FS 30CDi ErP - Regular', '£2,071.66'],
+                ['CBLR1389', 'Worcester Greenstar FS 42CDi ErP - Regular', '£2,691.74'],
+                ['CBLR3538', 'Worcester Greenstar 8000 Life 30kW Regular', '£1,776.82'],
+                ['CBLR3539', 'Worcester Greenstar 8000 Life 35kW Regular', '£1,961.66'],
+                ['CBLR3540', 'Worcester Greenstar 8000 Life 40kW Regular', '£2,308.37'],
+                ['CBLR3541', 'Worcester Greenstar 8000 Life 45kW Regular', '£2,506.49'],
+                ['CBLR3542', 'Worcester Greenstar 8000 Life 50kW Regular', '£2,655.08'],
+                ['CBLR3512', 'Worcester Greenstar 8000 Style 30kW System (Black and Chrome)', '£1,653.26'],
+                ['CBLR3575', 'Worcester Greenstar 8000+ 35kW Regular NG', '£1,952.80'],
+                ['CBLR3576', 'Worcester Greenstar 8000+ 40kW Regular NG', '£2,143.80'],
+                ['CBLR3577', 'Worcester Greenstar 8000+ 45kW Regular NG', '£2,428.60'],
+                ['CBLR3578', 'Worcester Greenstar 8000+ 50kW Regular NG', '£2,546.80'],
+                ['CBLR3375', 'Glowworm Energy7 12r \u2013 Regular', '£911.41'],
+                ['CBLR3377', 'Glowworm Energy7 18r - Regular', '£1,042.30'],
+                ['CBLR3376', 'Glowworm Energy7 15r - Regular', '£955.43'],
+                ['CBLR3378', 'Glowworm Energy7 25r - Regular', '£1,096.92'],
+                ['CBLR3393', 'Vaillant ecoTEC plus 424 - Regular', '£1,118.35'],
+                ['CBLR3394', 'Vaillant ecoTEC plus 430 - Regular', '£1,172.98'],
+                ['CBLR3423', 'Vaillant ecoFIT pure 412 - Regular', '£1,043.46'],
+                ['CBLR3425', 'Vaillant ecoFIT pure 418 - Regular', '£1,188.24'],
+                ['CBLR3428', 'Vaillant ecoFIT pure 435 - Regular', '£1,670.83'],
+                ['CBLR1911', 'Ideal Logic Heat Boiler 30kW', '£1,133.71'],
+                ['CBLR3390', 'Vaillant ecoTEC plus 412 - Regular', '£920.87'],
+                ['CBLR3391', 'Vaillant ecoTEC plus 415 - Regular', '£987.48'],
+                ['CBLR3424', 'Vaillant ecoFIT pure 415 - Regular', '£1,236.49'],
+                ['CBLR3426', 'Vaillant ecoFIT pure 425 - Regular', '£1,188.24'],
+                ['CBLR3427', 'Vaillant ecoFIT pure 430 - Regular', '£1,236.49'],
+                ['CBLR1919', 'Ideal Logic Heat2 H12 Boiler', '£870.11'],
+                ['CBLR3003', 'Keston Heat 2 45kW Regular Boiler', '£2,986.78'],
+                ['CBLR1920', 'Ideal Logic Heat2 H15 Boiler', '£933.04'],
+                ['CBLR1921', 'Ideal Logic Heat2 H18 Boiler', '£964.12'],
+                ['CBLR1922', 'Ideal Logic Heat2 H24 Boiler', '£1,027.04'],
+                ['CBLR1923', 'Ideal Logic Heat2 H30 Boiler', '£1,181.86'],
+                ['CBLR3379', 'Glowworm Energy7 30r - Regular', '£1,129.16'],
+                ['CBLR3392', 'Vaillant ecoTEC plus 418 - Regular', '£1,054.27'],
+                ['CBLR3709', 'Ariston Clas One R 15', '£750.00'],
+                ['CBLR6518', 'Viessmann Vitodens 100-W 11kW Heat Only B1GA', '£1,160.33'],
+                ['CBLR6519', 'Viessmann Vitodens 100-W 16kW Heat Only B1GA', '£1,205.66'],
+                ['CBLR6520', 'Viessmann Vitodens 100-W 19kW Heat Only B1GA', '£1,238.33'],
+                ['CBLR6521', 'Viessmann Vitodens 100-W 25kW Heat Only B1GA', '£1,320.34'],
+                ['CBLR6522', 'Viessmann Vitodens 100-W 32kW Heat Only B1GA', '£1,711.33']
+            ]},
+            { category: 'Conventional LPG', boilers: [
+                ['CBLR3456', 'Worcester Greenstar Ri 15kW LPG - Regular', '£1,058.90'],
+                ['CBLR3458', 'Worcester Greenstar Ri 18kW LPG - Regular', '£1,111.21'],
+                ['CBLR3462', 'Worcester Greenstar Ri 24kW LPG - Regular', '£1,175.50'],
+                ['CBLR1381', 'Worcester Greenstar 30Ri ErP LPG - Regular', '£1,365.83'],
+                ['CBLR3543', 'Worcester Greenstar 8000 Life 30kW Regular LPG', '£1,987.42'],
+                ['CBLR3544', 'Worcester Greenstar 8000 Life 35kW Regular LPG', '£2,132.58'],
+                ['CBLR3547', 'Worcester Greenstar 8000 Life 50kW Regular LPG', '£2,728.49'],
+                ['CBLR3454', 'Worcester Greenstar Ri 12kW LPG - Regular', '£992.29'],
+                ['CBLR3545', 'Worcester Greenstar 8000 Life 40kW Regular LPG', '£2,315.77'],
+                ['CBLR3581', 'Worcester Greenstar 8000+ 30kW Regular LPG', '£2,028.00'],
+                ['CBLR3582', 'Worcester Greenstar 8000+ 35kW Regular LPG', '£2,178.40'],
+                ['CBLR3583', 'Worcester Greenstar 8000+ 40kW Regular LPG', '£2,368.20'],
+                ['CBLR3584', 'Worcester Greenstar 8000+ 45kW Regular LPG', '£2,663.80'],
+                ['CBLR3585', 'Worcester Greenstar 8000+ 50kW Regular LPG', '£2,795.80'],
+                ['CBLR3546', 'Worcester Greenstar 8000 Life 45kW Regular LPG', '£2,601.08']
+            ]},
+            { category: 'System Natural Gas', boilers: [
+                ['CBLR3380', 'Glowworm Energy7 18s System ErP', '£1,054.27'],
+                ['CBLR3429', 'Vaillant ecoFIT pure 612 - System', '£1,188.24'],
+                ['CBLR3430', 'Vaillant ecoFIT pure 615 - System', '£1,226.84'],
+                ['CBLR3432', 'Vaillant ecoFIT pure 625 - System', '£1,381.27'],
+                ['CBLR3433', 'Vaillant ecoFIT pure 630 - System', '£1,574.30'],
+                ['CBLR3510', 'Worcester Greenstar 8000 Style 30kW System (White and Chrome)', '£1,800.74'],
+                ['CBLR3511', 'Worcester Greenstar 8000 Style 35kW System (White and Chrome)', '£1,828.39'],
+                ['CBLR3513', 'Worcester Greenstar 8000 Style 35kW System (Black and Chrome)', '£1,933.94'],
+                ['CBLR3548', 'Worcester Greenstar 8000 Life 30kW System', '£1,653.26'],
+                ['CBLR3549', 'Worcester Greenstar 8000 Life 35kW System', '£2,010.20'],
+                ['CBLR3604', 'Worcester Greenstar 4000 12kW System NG', '£1,051.75'],
+                ['CBLR3606', 'Worcester Greenstar 4000 15kW System NG', '£1,142.96'],
+                ['CBLR3608', 'Worcester Greenstar 4000 18kW System NG', '£1,163.71'],
+                ['CBLR3612', 'Worcester Greenstar 4000 24kW System NG', '£1,354.04'],
+                ['CBLR3721', 'Ariston Clas System One 30', '£969.44'],
+                ['CBLR3720', 'Ariston Clas System One 24', '£904.00'],
+                ['CBLR3718', 'Ariston Clas One R 24', '£896.11'],
+                ['CBLR3431', 'Vaillant ecoFIT pure 618 - System', '£1,284.76'],
+                ['CBLR3610', 'Worcester Greenstar 4000 21kW System NG', '£1,208.69'],
+                ['CBLR3002', 'Keston System 2 S30 System Boiler', '£1,706.28'],
+                ['CBLR1915', 'Ideal Logic System2 S15 Boiler', '£942.30'],
+                ['CBLR1916', 'Ideal Logic System2 S18 Boiler', '£1,117.20'],
+                ['CBLR1917', 'Ideal Logic System2 S24 Boiler', '£1,363.13'],
+                ['CBLR1918', 'Ideal Logic System2 S30 Boiler', '£1,509.06'],
+                ['CBLR3719', 'Ariston Clas System One 18', '£745.76'],
+                ['CBLR3381', 'Glowworm Energy7 25s System ErP', '£1,118.35'],
+                ['CBLR3572', 'Worcester Greenstar 8000+ 30kW System NG', '£1,681.80'],
+                ['CBLR3573', 'Worcester Greenstar 8000+ 35kW System NG', '£1,806.20'],
+                ['CBLR6513', 'Viessmann Vitodens 050-W 19kW System Boiler B0HA', '£1,123.33'],
+                ['CBLR6514', 'Viessmann Vitodens 050-W 25kW System Boiler B0HA', '£1,121.33'],
+                ['CBLR6523', 'Viessmann Vitodens 100-W 11kW System Boiler B1HF', '£1,414.00'],
+                ['CBLR6524', 'Viessmann Vitodens 100-W 19kW System Boiler B1HF', '£1,419.00'],
+                ['CBLR6525', 'Viessmann Vitodens 100-W 25kW System Boiler B1HF', '£1,488.00'],
+                ['CBLR6526', 'Viessmann Vitodens 100-W 32kW System Boiler B1HF', '£1,607.66']
+            ]},
+            { category: 'System LPG', boilers: [
+                ['CBLR1393', 'Worcester Greenstar 12i System ErP LPG', '£1,000.33'],
+                ['CBLR3605', 'Worcester Greenstar 4000 12kW System LPG', '£1,108.90'],
+                ['CBLR3607', 'Worcester Greenstar 4000 15kW System LPG', '£1,172.98'],
+                ['CBLR3609', 'Worcester Greenstar 4000 18kW System LPG', '£1,217.18'],
+                ['CBLR3611', 'Worcester Greenstar 4000 21kW System LPG', '£1,271.63'],
+                ['CBLR3613', 'Worcester Greenstar 4000 24kW System LPG', '£1,439.87'],
+                ['CBLR3550', 'Worcester Greenstar 8000 Life 30kW System LPG', '£1,784.15'],
+                ['CBLR3551', 'Worcester Greenstar 8000 Life 35kW System LPG', '£1,974.36'],
+                ['CBLR3524', 'Worcester Greenstar 8000 Style 30kW System LPG (White and Chrome)', '£1,784.15'],
+                ['CBLR3525', 'Worcester Greenstar 8000 Style 35kW System LPG (White and Chrome)', '£2,140.03'],
+                ['CBLR3526', 'Worcester Greenstar 8000 Style 30kW System LPG (Black and Chrome)', '£1,927.96'],
+                ['CBLR3527', 'Worcester Greenstar 8000 Style 35kW System LPG (Black and Chrome)', '£1,974.36'],
+                ['CBLR3579', 'Worcester Greenstar 8000+ 30kW System LPG', '£1,817.40'],
+                ['CBLR3580', 'Worcester Greenstar 8000+ 35kW System LPG', '£1,952.80']
+            ]}
+        ];
+
+        function openBoilerPrices() {
+            lastModeBeforeIntro = mode;
+            lastQuestionIndex = appData.currentQuestion;
+            mode = 'intro';
+            document.getElementById('questionnaire').style.display = 'none';
+            document.getElementById('results').classList.remove('active');
+            document.querySelectorAll('.intro-page').forEach(p => p.classList.remove('active'));
+
+            const container = document.getElementById('boiler-prices-content');
+            if (!container.innerHTML) {
+                let html = '';
+                boilerData.forEach(({ category, boilers }) => {
+                    html += `<h3 class="boiler-category">${category}</h3>`;
+                    html += '<table class="boiler-table"><tbody>';
+                    boilers.forEach(([code, name, price]) => {
+                        html += `<tr><td>${code}</td><td>${name}</td><td>${price || ''}</td></tr>`;
+                    });
+                    html += '</tbody></table>';
+                });
+                container.innerHTML = html;
+            }
+
+            document.getElementById('boiler-prices').classList.add('active');
+            window.scrollTo(0, 0);
+        }
 
         function showIntroPage(n) {
             document.querySelectorAll('.intro-page').forEach(p => p.classList.remove('active'));
