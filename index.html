@@ -543,6 +543,53 @@
         .divider::after {
             right: 0;
         }
+
+        .intro-page {
+            display: none;
+        }
+
+        .intro-page.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .intro-page h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .intro-page ul {
+            padding-left: 1.5rem;
+            margin: 0.75rem 0;
+        }
+
+        .intro-page li {
+            margin-bottom: 0.5rem;
+        }
+
+        .intro-page p {
+            margin-bottom: 0.75rem;
+        }
+
+        .app-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 0 0.5rem;
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .app-footer a {
+            color: var(--bg-primary);
+            text-decoration: none;
+            margin: 0 0.4rem;
+        }
+
+        .app-footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -557,6 +604,66 @@
             <p>Add to your home screen for quick access</p>
             <button onclick="installApp()">Install</button>
         </div>
+
+        <!-- Intro page 0: About this tool -->
+        <section id="intro-0" class="intro-page card">
+            <h2>About this tool</h2>
+            <p>This is a quick eligibility screener for UK energy support schemes, including:</p>
+            <ul>
+                <li>BGET (British Gas Energy Trust)</li>
+                <li>LEAP (Local Energy Advice Partnership)</li>
+                <li>Help4Homes</li>
+                <li>ECO4</li>
+                <li>Great British Insulation Scheme (GBIS)</li>
+                <li>Warm Home Discount, Winter Fuel Payment, and more</li>
+            </ul>
+            <p>Based on your answers it narrows down which schemes you may qualify for and gives you direct links to official providers.</p>
+            <div id="returnFromIntro-0" style="display:none; margin-bottom: 0.5rem;">
+                <button class="btn btn-secondary" onclick="returnFromIntro()" style="width:100%;">← Return to questionnaire</button>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" disabled>Back</button>
+                <button class="btn btn-primary" onclick="nextIntro()">Next</button>
+            </div>
+        </section>
+
+        <!-- Intro page 1: What it is not -->
+        <section id="intro-1" class="intro-page card">
+            <h2>What this tool is not</h2>
+            <ul>
+                <li>It is <strong>not</strong> an official eligibility confirmation — final decisions are made by scheme providers.</li>
+                <li>It is <strong>not</strong> financial or legal advice.</li>
+                <li>It does <strong>not</strong> submit applications on your behalf.</li>
+            </ul>
+            <p>Always check the official eligibility criteria for each scheme. If you are unsure, consider seeking independent advice.</p>
+            <div id="returnFromIntro-1" style="display:none; margin-bottom: 0.5rem;">
+                <button class="btn btn-secondary" onclick="returnFromIntro()" style="width:100%;">← Return to questionnaire</button>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="prevIntro()">Back</button>
+                <button class="btn btn-primary" onclick="nextIntro()">Next</button>
+            </div>
+        </section>
+
+        <!-- Intro page 2: Data & privacy -->
+        <section id="intro-2" class="intro-page card">
+            <h2>Data &amp; privacy</h2>
+            <p>This questionnaire asks about benefits, income, and household details only to match eligibility rules.</p>
+            <ul>
+                <li>Your answers are <strong>not</strong> stored on any server or database.</li>
+                <li>No account is required.</li>
+                <li>Answers are processed locally in your browser (in memory) and are lost when you close or refresh the page.</li>
+                <li>We do not set tracking cookies and we do not collect or store your answers.</li>
+            </ul>
+            <p><strong>Postcode lookup (optional):</strong> If you tap "Look Up" on the property page, your postcode is sent to <a href="https://postcodes.io" target="_blank">postcodes.io</a> and the <a href="https://epc.opendatacommunities.org" target="_blank">UK EPC Open Data service</a> to retrieve your property's EPC rating and council tax band. Manual entry is always available as an alternative. We do not store your postcode ourselves.</p>
+            <div id="returnFromIntro-2" style="display:none; margin-bottom: 0.5rem;">
+                <button class="btn btn-secondary" onclick="returnFromIntro()" style="width:100%;">← Return to questionnaire</button>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="prevIntro()">Back</button>
+                <button class="btn btn-primary" onclick="startQuestions()">Start questionnaire</button>
+            </div>
+        </section>
 
         <div id="questionnaire" class="card">
             <div class="progress">
@@ -748,9 +855,74 @@
         </div>
 
         <div id="results" class="results"></div>
+
+        <footer class="app-footer">
+            <a href="#" onclick="openIntroPage(0); return false;">About</a> ·
+            <a href="#" onclick="openIntroPage(1); return false;">What it is not</a> ·
+            <a href="#" onclick="openIntroPage(2); return false;">Data &amp; privacy</a>
+        </footer>
     </div>
 
     <script>
+        // Intro flow state
+        let introStep = 0;
+        let mode = 'intro';
+        let lastModeBeforeIntro = null;
+        let lastQuestionIndex = 1;
+
+        function showIntroPage(n) {
+            document.querySelectorAll('.intro-page').forEach(p => p.classList.remove('active'));
+            document.getElementById('intro-' + n).classList.add('active');
+            introStep = n;
+            const showReturn = lastModeBeforeIntro === 'questions' || lastModeBeforeIntro === 'results';
+            for (let i = 0; i <= 2; i++) {
+                const btn = document.getElementById('returnFromIntro-' + i);
+                if (btn) btn.style.display = showReturn ? 'block' : 'none';
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function nextIntro() {
+            introStep = Math.min(2, introStep + 1);
+            showIntroPage(introStep);
+        }
+
+        function prevIntro() {
+            introStep = Math.max(0, introStep - 1);
+            showIntroPage(introStep);
+        }
+
+        function startQuestions() {
+            mode = 'questions';
+            document.querySelectorAll('.intro-page').forEach(p => p.classList.remove('active'));
+            document.getElementById('questionnaire').style.display = 'block';
+            appData.currentQuestion = 1;
+            showQuestion(1);
+            window.scrollTo(0, 0);
+        }
+
+        function openIntroPage(n) {
+            lastModeBeforeIntro = mode;
+            lastQuestionIndex = appData.currentQuestion;
+            mode = 'intro';
+            document.getElementById('questionnaire').style.display = 'none';
+            document.getElementById('results').classList.remove('active');
+            showIntroPage(n);
+        }
+
+        function returnFromIntro() {
+            mode = lastModeBeforeIntro || 'questions';
+            document.querySelectorAll('.intro-page').forEach(p => p.classList.remove('active'));
+            if (mode === 'results') {
+                document.getElementById('results').classList.add('active');
+            } else {
+                document.getElementById('questionnaire').style.display = 'block';
+                appData.currentQuestion = lastQuestionIndex;
+                showQuestion(lastQuestionIndex);
+            }
+            window.scrollTo(0, 0);
+        }
+
         // App data
         const appData = {
             currentQuestion: 1,
@@ -1124,6 +1296,10 @@
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
+            // Start in intro mode
+            document.getElementById('questionnaire').style.display = 'none';
+            showIntroPage(0);
+
             // Option buttons
             document.querySelectorAll('.option-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
