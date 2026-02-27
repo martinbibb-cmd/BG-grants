@@ -590,6 +590,111 @@
         .app-footer a:hover {
             text-decoration: underline;
         }
+
+        /* Boiler Catalogue */
+        .boiler-catalogue-page {
+            display: none;
+        }
+
+        .boiler-catalogue-page.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .boiler-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .boiler-category h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--bg-primary);
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .boiler-table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .boiler-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        .boiler-table th {
+            background: var(--bg-primary);
+            color: white;
+            padding: 0.5rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .boiler-table td {
+            padding: 0.45rem 0.6rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .boiler-table tr:hover td {
+            background: #F0F7FF;
+        }
+
+        .boiler-table tr.unavailable td {
+            opacity: 0.45;
+        }
+
+        .boiler-price {
+            white-space: nowrap;
+            font-weight: 600;
+            color: var(--bg-success);
+        }
+
+        .boiler-no-price {
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+        }
+
+        .lead-time-badge {
+            display: inline-block;
+            background: #E6F2FF;
+            color: var(--bg-primary);
+            border-radius: 12px;
+            padding: 0.1rem 0.45rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .lead-time-unavail {
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+        }
+
+        .boiler-code {
+            font-family: monospace;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* iOS install hint */
+        .ios-install-hint {
+            background: #FFF3E0;
+            border: 2px solid var(--bg-warning);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .ios-install-hint.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -600,9 +705,14 @@
 
     <div class="container">
         <div id="installPrompt" class="install-prompt">
-            <strong>Install this app</strong>
+            <strong>📲 Install this app</strong>
             <p>Add to your home screen for quick access</p>
             <button onclick="installApp()">Install</button>
+        </div>
+
+        <div id="iosInstallHint" class="ios-install-hint">
+            <strong>📲 Save to Home Screen</strong>
+            <p style="margin-top: 0.4rem;">To install this app on your iPhone or iPad: tap the <strong>Share</strong> button at the bottom of your browser, then choose <strong>"Add to Home Screen"</strong>.</p>
         </div>
 
         <!-- Intro page 0: About this tool -->
@@ -856,10 +966,21 @@
 
         <div id="results" class="results"></div>
 
+        <!-- Boiler Catalogue Page -->
+        <section id="boilerCataloguePage" class="boiler-catalogue-page card">
+            <h2>🔥 Boiler Price Guide</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">Prices shown are current list prices. Lead time is the estimated number of working days for delivery/installation. Items marked "Not available" are out of stock.</p>
+            <div id="boilerCatalogueContent"></div>
+            <div class="nav-buttons" style="margin-top: 1rem;">
+                <button class="btn btn-secondary" onclick="returnFromCatalogue()">← Back</button>
+            </div>
+        </section>
+
         <footer class="app-footer">
             <a href="#" onclick="openIntroPage(0); return false;">About</a> ·
             <a href="#" onclick="openIntroPage(1); return false;">What it is not</a> ·
-            <a href="#" onclick="openIntroPage(2); return false;">Data &amp; privacy</a>
+            <a href="#" onclick="openIntroPage(2); return false;">Data &amp; privacy</a> ·
+            <a href="#" onclick="openBoilerCatalogue(); return false;">Boiler Prices</a>
         </footer>
     </div>
 
@@ -1679,7 +1800,182 @@
                     }
                 });
             }
+
+            // Show iOS install hint for iOS devices not in standalone mode
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if (isIOS && !isStandalone) {
+                document.getElementById('iosInstallHint').classList.add('show');
+            }
         });
+
+        // Boiler Catalogue Data
+        const boilerCatalogue = [
+            {
+                category: 'Natural Gas Boilers',
+                boilers: [
+                    { code: 'CBLR3446', name: 'Worcester Greenstar 32CDi Compact', price: 1541.88, leadTime: 1 },
+                    { code: 'CBLR3447', name: 'Worcester Greenstar 36CDi Compact', price: 1670.24, leadTime: 1 },
+                    { code: 'CBLR3562', name: 'Worcester Greenstar 8000+ 40kW Combi NG', price: 1967.60, leadTime: 3 },
+                    { code: 'CBLR3532', name: 'Worcester Greenstar 8000 Life 50kW Combi', price: null, leadTime: 0 },
+                    { code: 'CBLR3434', name: 'Vaillant ecoTEC+ 825', price: null, leadTime: 0 },
+                    { code: 'CBLR3420', name: 'Vaillant ecoFIT pure 825', price: 1188.24, leadTime: 1 },
+                    { code: 'CBLR3421', name: 'Vaillant ecoFIT pure 830', price: 1333.01, leadTime: 1 },
+                    { code: 'CBLR3422', name: 'Vaillant ecoFIT pure 835', price: 1574.30, leadTime: 3 },
+                    { code: 'CBLR3437', name: 'Vaillant ecoTEC+ 835', price: null, leadTime: 0 },
+                    { code: 'CBLR3438', name: 'Vaillant ecoTEC+ 838', price: null, leadTime: 0 },
+                    { code: 'CBLR3439', name: 'Vaillant ecoTEC pro 24', price: 1118.35, leadTime: 3 },
+                    { code: 'CBLR3440', name: 'Vaillant ecoTEC pro 28', price: 1183.79, leadTime: 3 },
+                    { code: 'CBLR3385', name: 'Vaillant ecoTEC pro 30 ErP', price: 1238.62, leadTime: 3 },
+                    { code: 'CBLR3382', name: 'Glowworm Energy7 25c ErP', price: 1030.33, leadTime: 3 },
+                    { code: 'CBLR3383', name: 'Glowworm Energy7 30c ErP', price: 1140.94, leadTime: 1 },
+                    { code: 'CBLR3384', name: 'Glowworm Energy7 35c ErP', price: 1401.54, leadTime: 3 },
+                    { code: 'CBLR1390', name: 'Worcester Greenstar Highflow 440 CDi ErP', price: 2458.39, leadTime: 5 },
+                    { code: 'CBLR3444', name: 'Worcester Greenstar Highflow 550CDi', price: null, leadTime: 0 },
+                    { code: 'CBLR3600', name: 'Worcester Greenstar 4000 25kW Combi NG', price: 1176.65, leadTime: 1 },
+                    { code: 'CBLR3602', name: 'Worcester Greenstar 4000 30kW Combi NG', price: 1392.66, leadTime: 1 },
+                    { code: 'CBLR3504', name: 'Worcester Greenstar 8000 Style 50kW Combi (White and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3503', name: 'Worcester Greenstar 8000 Style 45kW Combi (White and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3508', name: 'Worcester Greenstar 8000 Style 45kW Combi (Black and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3509', name: 'Worcester Greenstar 8000 Style 50kW Combi (Black and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3506', name: 'Worcester Greenstar 8000 Style 35kW Combi (Black and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3561', name: 'Worcester Greenstar 8000+ 36kW Combi NG', price: 1772.80, leadTime: 1 },
+                    { code: 'CBLR3563', name: 'Worcester Greenstar 8000+ 45kW Combi NG', price: 2257.20, leadTime: 7 },
+                    { code: 'CBLR3564', name: 'Worcester Greenstar 8000+ 50kW Combi NG', price: 2371.80, leadTime: 7 },
+                    { code: 'CBLR3701', name: 'Viessmann Vitodens 100-W 16 kW', price: null, leadTime: 0 },
+                    { code: 'CBLR3000', name: 'Keston Combi 2 C30 Combination Boiler', price: 1812.97, leadTime: 7 },
+                    { code: 'CBLR3001', name: 'Keston Combi 2 C35 Combination Boiler', price: 2026.40, leadTime: 7 },
+                    { code: 'CBLR1912', name: 'Ideal Logic Combi2 C24 Boiler', price: 1246.73, leadTime: 1 },
+                    { code: 'CBLR1913', name: 'Ideal Logic Combi2 C30 Boiler', price: 1331.86, leadTime: 1 },
+                    { code: 'CBLR1914', name: 'Ideal Logic Combi2 C35 Boiler', price: 1482.61, leadTime: 1 },
+                    { code: 'CBLR3459', name: 'Worcester Greenstar 28CDi Compact', price: 1303.01, leadTime: 1 },
+                    { code: 'CBLR3463', name: 'Vaillant ecoTEC Exclusive 35kW Combi Boiler', price: null, leadTime: 0 },
+                    { code: 'CBLR3464', name: 'Vaillant ecoTEC Exclusive 43kW Combi Boiler', price: null, leadTime: 0 },
+                    { code: 'CBLR3500', name: 'Worcester Greenstar 8000 Style 30kW Combi (White and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3710', name: 'Ariston Clas One 24', price: null, leadTime: 0 },
+                    { code: 'CBLR3712', name: 'Ariston Clas One 38', price: null, leadTime: 0 },
+                    { code: 'CBLR3711', name: 'Ariston Clas One 30', price: null, leadTime: 0 },
+                    { code: 'CBLR3560', name: 'Worcester Greenstar 8000+ 32kW Combi NG', price: 1638.40, leadTime: 1 },
+                    { code: 'CBLR3565', name: 'Worcester Greenstar 8000+ Style 32kW Combi NG', price: 1797.60, leadTime: 3 },
+                    { code: 'CBLR3566', name: 'Worcester Greenstar 8000+ Style 36kW Combi NG', price: 1932.00, leadTime: 3 },
+                    { code: 'CBLR3574', name: 'Worcester Greenstar 8000+ 30kW Regular NG', price: 1809.80, leadTime: 1 },
+                    { code: 'CBLR6510', name: 'Viessmann Vitodens 050-W 25kW Combi B0KA', price: 1162.48, leadTime: 3 },
+                    { code: 'CBLR6511', name: 'Viessmann Vitodens 050-W 30kW Combi B0KA', price: 1145.10, leadTime: 3 },
+                    { code: 'CBLR6512', name: 'Viessmann Vitodens 050-W 35kW Combi B0KA', price: 1287.00, leadTime: 3 },
+                    { code: 'CBLR6515', name: 'Viessmann Vitodens 100-W 26 kW Combi Boiler B1KF', price: 1467.34, leadTime: 3 },
+                    { code: 'CBLR6516', name: 'Viessmann Vitodens 100-W 30 kW Combi Boiler B1KF', price: 1551.00, leadTime: 3 },
+                    { code: 'CBLR6517', name: 'Viessmann Vitodens 100-W 35 kW Combi Boiler B1KF', price: 1608.00, leadTime: 3 },
+                    { code: 'CBLR3593', name: 'Worcester Bosch Greenstar 8000 F 50kW Combi NG', price: 3234.90, leadTime: 3 }
+                ]
+            },
+            {
+                category: 'LPG Boilers',
+                boilers: [
+                    { code: 'CBLR1370', name: 'Worcester Greenstar 32CDi Compact ErP LPG', price: 1628.75, leadTime: 3 },
+                    { code: 'CBLR1371', name: 'Worcester Greenstar 36CDi Compact ErP LPG', price: 1714.45, leadTime: 3 },
+                    { code: 'CBLR3514', name: 'Worcester Greenstar 8000 Style 30kW Combi LPG (White and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3516', name: 'Worcester Greenstar 8000 Style 40kW Combi LPG (White and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3517', name: 'Worcester Greenstar 8000 Style 45kW Combi LPG (White and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3518', name: 'Worcester Greenstar 8000 Style 50kW Combi LPG (White and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3521', name: 'Worcester Greenstar 8000 Style 40kW Combi LPG (Black and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3522', name: 'Worcester Greenstar 8000 Style 45kW Combi LPG (Black and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3533', name: 'Worcester Greenstar 8000 Life 30kW Combi LPG', price: null, leadTime: 0 },
+                    { code: 'CBLR3534', name: 'Worcester Greenstar 8000 Life 35kW Combi LPG', price: null, leadTime: 0 },
+                    { code: 'CBLR3535', name: 'Worcester Greenstar 8000 Life 40kW Combi LPG', price: null, leadTime: 0 },
+                    { code: 'CBLR3536', name: 'Worcester Greenstar 8000 Life 45kW Combi LPG', price: null, leadTime: 0 },
+                    { code: 'CBLR3537', name: 'Worcester Greenstar 8000 Life 50kW Combi LPG', price: null, leadTime: 0 },
+                    { code: 'CBLR1391', name: 'Worcester Greenstar Highflow 440 CDi ErP LPG', price: null, leadTime: 0 },
+                    { code: 'CBLR3445', name: 'Worcester Greenstar Highflow 550CDi LPG', price: null, leadTime: 0 },
+                    { code: 'CBLR3601', name: 'Worcester Greenstar 4000 25kW Combi LPG', price: 1292.09, leadTime: 3 },
+                    { code: 'CBLR3603', name: 'Worcester Greenstar 4000 30kW Combi LPG', price: 1403.86, leadTime: 3 },
+                    { code: 'CBLR3519', name: 'Worcester Greenstar 8000 Style 30kW Combi LPG (Black and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3520', name: 'Worcester Greenstar 8000 Style 35kW Combi LPG (Black and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3515', name: 'Worcester Greenstar 8000 Style 35kW Combi LPG (White and Chrome)', price: null, leadTime: 0 },
+                    { code: 'CBLR3454', name: 'Worcester Greenstar Ri 12kW LPG - Regular', price: 992.29, leadTime: 5 },
+                    { code: 'CBLR3567', name: 'Worcester Greenstar 8000+ 32kW Combi LPG', price: 1772.80, leadTime: 3 },
+                    { code: 'CBLR3568', name: 'Worcester Greenstar 8000+ 36kW Combi LPG', price: 1920.80, leadTime: 3 },
+                    { code: 'CBLR3569', name: 'Worcester Greenstar 8000+ 40kW Combi LPG', price: 2119.20, leadTime: 7 },
+                    { code: 'CBLR3570', name: 'Worcester Greenstar 8000+ 45kW Combi LPG', price: 2413.80, leadTime: 7 },
+                    { code: 'CBLR3571', name: 'Worcester Greenstar 8000+ 50kW Combi LPG', price: 2548.00, leadTime: 7 }
+                ]
+            },
+            {
+                category: 'Upgrades',
+                boilers: [
+                    { code: 'CBLR3586', name: 'Upgrade to Worcester Bosch 4000 30kW (from WB 2000)', price: null, leadTime: 1 },
+                    { code: 'CBLR3587', name: 'Upgrade to Worcester Bosch 8000+ 36kW (from WB 4000 30kW)', price: null, leadTime: 1 },
+                    { code: 'CBLR3588', name: 'Upgrade to Worcester Bosch 8000+ 36kW (from WB 2000 25kW)', price: null, leadTime: 1 },
+                    { code: 'CBLR3589', name: 'Upgrade to Ideal Logic Combi 30kW (from Ideal Logic Combi2 24kW)', price: null, leadTime: 1 }
+                ]
+            }
+        ];
+
+        function renderBoilerCatalogue() {
+            const container = document.getElementById('boilerCatalogueContent');
+            let html = '';
+            boilerCatalogue.forEach(cat => {
+                html += `<div class="boiler-category">
+                    <h3>${cat.category}</h3>
+                    <div class="boiler-table-wrap">
+                        <table class="boiler-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Model</th>
+                                    <th>Price</th>
+                                    <th>Lead Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                cat.boilers.forEach(b => {
+                    const unavailable = b.price === null && b.leadTime === 0;
+                    const rowClass = unavailable ? ' class="unavailable"' : '';
+                    const priceCell = b.price !== null
+                        ? `<span class="boiler-price">£${b.price.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`
+                        : b.leadTime > 0
+                            ? `<span class="boiler-no-price">POA</span>`
+                            : `<span class="boiler-no-price">—</span>`;
+                    const leadCell = b.leadTime > 0
+                        ? `<span class="lead-time-badge">${b.leadTime} day${b.leadTime > 1 ? 's' : ''}</span>`
+                        : `<span class="lead-time-unavail">Not available</span>`;
+                    html += `<tr${rowClass}>
+                        <td><span class="boiler-code">${b.code}</span></td>
+                        <td>${b.name}</td>
+                        <td>${priceCell}</td>
+                        <td>${leadCell}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table></div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function openBoilerCatalogue() {
+            lastModeBeforeIntro = mode;
+            lastQuestionIndex = appData.currentQuestion;
+            mode = 'catalogue';
+            document.getElementById('questionnaire').style.display = 'none';
+            document.getElementById('results').classList.remove('active');
+            document.querySelectorAll('.intro-page').forEach(p => p.classList.remove('active'));
+            renderBoilerCatalogue();
+            document.getElementById('boilerCataloguePage').classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function returnFromCatalogue() {
+            document.getElementById('boilerCataloguePage').classList.remove('active');
+            mode = lastModeBeforeIntro || 'intro';
+            if (mode === 'results') {
+                document.getElementById('results').classList.add('active');
+            } else if (mode === 'questions') {
+                document.getElementById('questionnaire').style.display = 'block';
+                appData.currentQuestion = lastQuestionIndex;
+                showQuestion(lastQuestionIndex);
+            } else {
+                showIntroPage(introStep);
+            }
+            window.scrollTo(0, 0);
+        }
 
         // Service Worker Registration
         if ('serviceWorker' in navigator) {

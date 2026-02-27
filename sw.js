@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bg-grants-v4';
+const CACHE_NAME = 'bg-grants-v5';
 const urlsToCache = [
   './',
   './index.html',
